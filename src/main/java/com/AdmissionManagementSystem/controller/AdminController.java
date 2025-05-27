@@ -1,10 +1,9 @@
 package com.AdmissionManagementSystem.controller;
 
 import com.AdmissionManagementSystem.Entity.Courses;
-import com.AdmissionManagementSystem.Entity.Student;
-import com.AdmissionManagementSystem.Service.AdminService;
+import com.AdmissionManagementSystem.Entity.User;
+import com.AdmissionManagementSystem.Service.UserService;
 import com.AdmissionManagementSystem.Service.CourseService;
-import com.AdmissionManagementSystem.Service.StudentService;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,18 +17,16 @@ import java.util.List;
 public class AdminController {
 
     @Autowired
-    private AdminService adminService;
+    private UserService userService;
 
     @Autowired
     private CourseService courseService;
-    @Autowired
-    private StudentService studentService;
 
     //Crud operation for Students
 
     @GetMapping("/all-students")
     public ResponseEntity<?> getAllStudenets(){
-        List<Student> all=adminService.getAllStudents();
+        List<User> all= userService.getAllStudents();
         if (!all.isEmpty()){
             return new ResponseEntity<>(all, HttpStatus.OK);
         }
@@ -39,9 +36,9 @@ public class AdminController {
     @GetMapping("/student/{id}")
     public ResponseEntity<?> getStudent(@PathVariable ObjectId id){
         try {
-            Student student = studentService.getStudentById(id);
-            if (student != null) {
-                return new ResponseEntity<>(student, HttpStatus.OK);
+            User user = userService.getStudentById(id);
+            if (user != null) {
+                return new ResponseEntity<>(user, HttpStatus.OK);
             } else {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
@@ -110,6 +107,6 @@ public class AdminController {
 
     @GetMapping("/healthCheck")
     public String healthCheck() {
-        return "Health check form Public Controllere";
+        return "Health check form Admin Controllere";
     }
 }
