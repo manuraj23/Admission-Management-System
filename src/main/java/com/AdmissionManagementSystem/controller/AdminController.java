@@ -1,7 +1,10 @@
 package com.AdmissionManagementSystem.controller;
 
 import com.AdmissionManagementSystem.Entity.Courses;
+import com.AdmissionManagementSystem.Entity.EnrollmentForm;
 import com.AdmissionManagementSystem.Entity.User;
+import com.AdmissionManagementSystem.Service.EmailService;
+import com.AdmissionManagementSystem.Service.EnrollmentService;
 import com.AdmissionManagementSystem.Service.UserService;
 import com.AdmissionManagementSystem.Service.CourseService;
 import org.bson.types.ObjectId;
@@ -21,8 +24,12 @@ public class AdminController {
 
     @Autowired
     private CourseService courseService;
+    @Autowired
+    private EnrollmentService enrollmentService;
 
-    //Crud operation for Students
+    @Autowired
+    private EmailService emailService;
+
 
     @GetMapping("/all-students")
     public ResponseEntity<?> getAllStudenets(){
@@ -96,14 +103,71 @@ public class AdminController {
     }
 
     @DeleteMapping("/deleteCourse/{id}")
-        public ResponseEntity<?> deleteCourse(@PathVariable ObjectId id) {
-            try {
-                courseService.deleteCourseById(id);
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-            } catch (Exception e) {
+    public ResponseEntity<?> deleteCourse(@PathVariable ObjectId id) {
+        try {
+            courseService.deleteCourseById(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("getAllEnrollment")
+    public ResponseEntity<?> getAllApplications(){
+        List<EnrollmentForm>all=enrollmentService.getAllApplication();
+        if (!all.isEmpty()){
+            return new ResponseEntity<>(all, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PutMapping("/updateEnrollmentStatus/{id}")
+    public ResponseEntity<?> updateEnrollmentStatus(@PathVariable ObjectId id, @RequestBody EnrollmentForm enrollmentForm) {
+        try {
+            EnrollmentForm enrollment = enrollmentService.getEnrollmentById(id);
+
+            User matchedUser1 = null;
+            List<User> allUsers = userService.getAllStudents();
+            for (User u : allUsers) {
+                if (u.getEnrollmentForm() != null) {
+                    for (EnrollmentForm ef : u.getEnrollmentForm()) {
+                        if (ef.getId().equals(id)) {
+                            matchedUser1 = u;
+                            break;
+                        }
+                    }
+                }
+                if (matchedUser1 != null) break;
+            }
+
+            System.out.println(enrollment);
+            System.out.println(matchedUser1);
+
+            String to = matchedUser1.getEmail();
+            String subject = "Application " + enrollmentForm.getStatus();
+            String text = "Dear " + matchedUser1.getName() + ",\n\n" +
+                    "Your application has been"+ enrollmentForm.getStatus() +
+                    "Thank you for applying.\n\n" +
+                    "Regards,\nAdmission Team";
+
+            emailService.sendEmail(to, subject, text);
+
+            if ("APPROVED".equalsIgnoreCase(String.valueOf(enrollmentForm.getStatus()))) {
+                enrollmentService.addCourse(matchedUser1,id);
+            }
+
+            if (enrollment != null){
+                enrollment.setStatus(enrollmentForm.getStatus());
+                enrollmentService.updateEnrollment(enrollment);
+                return new ResponseEntity<>(enrollment, HttpStatus.OK);
+            } else {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
+
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+    }
 
     @GetMapping("/healthCheck")
     public String healthCheck() {

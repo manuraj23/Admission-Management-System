@@ -1,5 +1,6 @@
 package com.AdmissionManagementSystem.Entity;
 
+import com.AdmissionManagementSystem.Enum.Status;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,6 +21,9 @@ public class EnrollmentForm {
     @NonNull
     private String courseCode;
 
-    private String status;
+    @NonNull
+    private String twelfthMarks;
+
+    private Status status;
 
 }

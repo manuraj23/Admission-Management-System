@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
 import java.util.List;
 @Document(collection = "User")
 @Data
@@ -36,9 +37,9 @@ public class User {
 
     private List<String> role;
 
-//    @DBRef
-//    private List<Courses> course;
-//
-//    @DBRef
-//    private List<String> EnrollmentStatus;
+
+    private List<Courses> courseEnrolled=new ArrayList<>();
+    @DBRef
+    private List<EnrollmentForm> enrollmentForm=new ArrayList<>();
+
 }

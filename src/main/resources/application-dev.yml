@@ -1,9 +1,20 @@
 spring:
   data:
     mongodb:
-      uri: mongodb+srv://manuraj0642:l4jMctLwoCR3Dw6U@cluster0.qvcxx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+      uri: ${MONGO_URI}
       database: StudentDB
-      auto-index-creation: true
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USER}
+    password: ${MAIL_PASS}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+    protocol: smtp
 
 server:
   port: 8085
